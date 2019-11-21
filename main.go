@@ -1,20 +1,23 @@
 package main
 
 import (
-  "fmt"
-  "github.com/ckbball/api-gin"
+  //"fmt"
+  //"github.com/ckbball/api-gin/common"
+  "github.com/ckbball/api-gin/routers"
+  "github.com/gin-gonic/gin"
 )
 
 func main() {
-  fmt.Println("False : False")
-  fmt.Println(ValidateParams("string", "description"))
 
-  fmt.Println("False : True")
-  fmt.Println(ValidateParams("string", "desc"))
+  //common.InitURL()
 
-  fmt.Println("True : False")
-  fmt.Println(ValidateParams("reads", "description"))
+  r := gin.Default()
 
-  fmt.Println("True : True")
-  fmt.Println(ValidateParams("reads", "asc"))
+  v1 := r.Group("/api")
+
+  {
+    routers.Register(v1.Group(""))
+  }
+
+  r.Run()
 }
