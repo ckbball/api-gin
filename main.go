@@ -1,8 +1,6 @@
 package main
 
 import (
-  //"fmt"
-  //"github.com/ckbball/api-gin/common"
   "github.com/ckbball/api-gin/routers"
   "github.com/gin-gonic/gin"
 )

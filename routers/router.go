@@ -2,6 +2,7 @@ package routers
 
 import (
   "fmt"
+  "github.com/ckbball/api-gin/cache"
   "github.com/ckbball/api-gin/handlers"
   "github.com/gin-gonic/gin"
   "github.com/joho/godotenv"
@@ -55,19 +56,26 @@ func GetPosts(c *gin.Context) {
 
   url := os.Getenv("URL_STRING")
 
-  //get blog posts
-  // check cache
-  // call api func that would go through each tag and make a call and add to cache
-  posts, err := handlers.GetPosts(tags, url)
+  newTags, posts := cache.FilterCache(tags)
 
-  result := handlers.SortPosts(posts, sortBy, direction)
+  //get blog posts
+  // call api func that would go through each tag and make a call and add to cache
+  new_posts, cache_map, err := handlers.GetPosts(newTags, url, posts)
+
+  // add to cache here
+  for tagg, post_cache := range cache_map {
+    cache.InsertPosts(post_cache, tagg)
+  }
+
+  // sort
+  result := handlers.SortPosts(new_posts, sortBy, direction)
   if err != nil {
     c.JSON(http.StatusBadRequest, gin.H{"error": err})
     return
   }
 
   //set response
-  c.JSON(http.StatusOK, gin.H{"posts": final})
+  c.JSON(http.StatusOK, gin.H{"posts": result})
 }
 
 func ValidateSort(sort string) bool {

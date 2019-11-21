@@ -23,31 +23,35 @@ type Posts struct {
   Posts []*Post `json:"posts"`
 }
 
-func GetPosts(tags string, url string) ([]*Post, error) {
+func GetPosts(tags string, url string, out_posts []*Post) ([]*Post, map[string][]*Post, error) {
   t := strings.Split(tags, ",")
 
-  var out_posts []*Post
+  //var out_posts []*Post
   keys := make(map[int]bool)
+
+  cache := make(map[string][]*Post)
 
   for _, in := range t {
     full := urlBuilder(url, in)
     response, err := http.Get(full)
     if err != nil {
       fmt.Println("HTTP request failed with error %s\n", err)
-      return nil, err
+      return nil, nil, err
     }
     var posts Posts
     if err := json.NewDecoder(response.Body).Decode(&posts); err != nil {
       log.Println(err)
     }
     for _, val := range posts.Posts {
+      // cache[in] = append(cache[in], val)
       if _, value := keys[val.Id]; !value {
         keys[val.Id] = true
+        cache[in] = append(cache[in], val) //
         out_posts = append(out_posts, val)
       }
     }
   }
-  return out_posts, nil
+  return out_posts, cache, nil
 }
 
 func urlBuilder(base, tag string) string {
@@ -81,10 +85,11 @@ func SortPosts(posts []*Post, sor, direction string) []*Post {
     sort.Slice(posts, func(i, j int) bool { return posts[i].Id > posts[j].Id })
   }
 
-  fmt.Printf("Sorted Posts: \n")
-  for _, post := range posts {
-    fmt.Printf("%+v \n", post.Likes)
-  }
+  /*
+    fmt.Printf("Sorted Posts: \n")
+    for _, post := range posts {
+      fmt.Printf("%+v \n", post.Likes)
+    }*/
   return posts
 }
 
